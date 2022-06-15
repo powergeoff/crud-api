@@ -20,7 +20,10 @@ const getTodoById = (req, res) => {
 }
 
 const createTodo = (req, res) => {
-    console.dir(req.body)
+    if (!checkToken(req)) {
+        res.status(401).send('Unauthorized Create');
+        return;
+    }
     const todo = new Todo({
         title: req.body.title,
         description: req.body.description,
@@ -36,6 +39,10 @@ const createTodo = (req, res) => {
 };
 
 const updateToDo = (req, res) => {
+    if (!checkToken(req)) {
+        res.status(401).send('Unauthorized Update');
+        return;
+    }
     Todo.findOneAndUpdate(
         { _id: req.params.id },
         {
@@ -55,10 +62,18 @@ const updateToDo = (req, res) => {
 };
 
 const deleteTodo = (req, res) => {
+    if (!checkToken(req)) {
+        res.status(401).send('Unauthorized Delete');
+        return;
+    }
     Todo.deleteOne({ _id: req.params.id })
       .then(() => res.json({ message: "Todo Deleted" }))
       .catch((err) => res.send(err));
 };
+
+const checkToken = (req) => {
+    return req.body.token === process.env.SECRET_TOKEN
+}
   
 module.exports = {
     getTodos,
